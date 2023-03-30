@@ -1,7 +1,6 @@
+#include "ros/ros.h"
 #include <string>
 #include <vector>
-
-#include "ros/ros.h"
 
 // use cv_bridge to publish image
 #include <opencv2/highgui.hpp>
@@ -32,8 +31,6 @@ int main(int argc, char *argv[]) {
   std::vector<cv::String> fn;
   glob(dir + "*.png", fn, false);
 
-  std::vector<cv::Mat> images;
-  size_t count = fn.size();  // number of png files in images folder
   // cv::Mat im=cv::imread(fn[0]);
   // if (im.empty()) {
   //   gDebug << FATAL_ERROR << "Could not read the image: " << image_path;
