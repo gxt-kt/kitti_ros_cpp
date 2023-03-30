@@ -1,3 +1,5 @@
+#ifndef READ_CLOUDPOINT_BIN_HPP
+#define READ_CLOUDPOINT_BIN_HPP
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
@@ -13,7 +15,7 @@ struct Point {
   float x;
   float y;
   float z;
-  float intensity;  //
+  float intensity;
 };
 
 inline bool ConvertKittiBin2Point(std::string filename,
@@ -61,3 +63,4 @@ inline bool ConvertKittiBin2PclPointCloud(std::string filename, pcl::PointCloud<
 
   return 0;
 }
+#endif

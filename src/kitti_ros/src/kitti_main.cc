@@ -3,21 +3,12 @@
 
 #include "ros/ros.h"
 
-// use cv_bridge to publish image
-#include <opencv2/highgui.hpp>
-
-#include "cv_bridge/cv_bridge.h"
-#include "image_transport/image_transport.h"
-#include "opencv2/core.hpp"
-#include "opencv2/opencv.hpp"
-#include "opencv2/videoio.hpp"
-
-// use pointcloud to send lidar data
-#include <sensor_msgs/PointCloud.h>
 
 // debugstream by gxt_kt
 #include "kitti_ros/debugstream.hpp"
-#include "kitti_ros/read_cloudpoint_bin.hpp"
+#include "kitti_ros/marker_line.hpp"
+#include "kitti_ros/cloud_points.hpp"
+#include "kitti_ros/images.hpp"
 
 // dataset directory
 std::string dir =
@@ -33,17 +24,16 @@ int main(int argc, char *argv[]) {
   gDebug << "main_publish";
 
   // image pub
-  image_transport::ImageTransport it(nh);
-  image_transport::Publisher image_pub = it.advertise("camera02/image", 10);
+  SendImage pub_image(nh, "camera02/image", 10);
 
   // cloudpoint pub
-  ros::Publisher cloud_pub =
-      nh.advertise<sensor_msgs::PointCloud2>("cloudpoint", 50);
+  CloudPoint pub_cloudpoint(nh, "cloudpoint", 50);
 
+  // marker pub
+  SendMarkerLine pub_line(nh, "line_pub");
 
   ros::Rate loop_rate(10);
   while (nh.ok()) {
-
     // get current dataset sequence i
     static int kitti_i{0};
     kitti_i %= 154;
@@ -52,31 +42,14 @@ int main(int argc, char *argv[]) {
     std::string katti_num = ss.str();
     kitti_i++;
 
-    {  // send_image
-      cv::Mat image = cv::imread(image_dir + katti_num + ".png");
-      // cv::imshow("image",image);
-      if (image.empty()) {
-        gDebug << FATAL_ERROR << "error image is empty";
-        return 1;
-      }
-      std_msgs::Header header;
-      header.stamp = ros::Time::now();
-      header.frame_id = "map";
-      sensor_msgs::ImagePtr msg =
-          cv_bridge::CvImage(header, "bgr8", image).toImageMsg();
-      image_pub.publish(msg);
-    }
+    // send_image
+    pub_image.Publish(image_dir + katti_num + ".png");
 
-    {  // send lidar cloud_point
-      pcl::PointCloud<pcl::PointXYZI>::Ptr cloud(
-          new pcl::PointCloud<pcl::PointXYZI>);
-      ConvertKittiBin2PclPointCloud(lidar_dir + katti_num+".bin", cloud);
-      sensor_msgs::PointCloud2 ros_cloud;
-      pcl::toROSMsg(*cloud, ros_cloud);
-      ros_cloud.header.frame_id = "map";
-      ros_cloud.header.stamp = ros::Time::now();
-      cloud_pub.publish(ros_cloud);
-    }
+    // send lidar cloud_point
+    pub_cloudpoint.Publish(lidar_dir + katti_num + ".bin");
+
+    // send line marker
+    pub_line.Publish();
 
     gDebug << "send kitti dataset i =" << kitti_i;
     ros::spinOnce();
