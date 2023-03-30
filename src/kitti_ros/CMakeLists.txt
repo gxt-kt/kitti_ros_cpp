@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   image_transport
   cv_bridge
   OpenCV
+  pcl_ros REQUIRED
 )
 
 ## System dependencies are found with CMake's conventions
@@ -124,7 +125,10 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  ${PCL_INCLUDE_DIRS}
 )
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
@@ -154,6 +158,7 @@ add_executable(${PROJECT_NAME}_node src/kitti_main.cc)
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_node
   ${catkin_LIBRARIES}
+  ${PCL_LIBRARIES}
 )
 
 #############
