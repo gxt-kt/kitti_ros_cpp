@@ -10,27 +10,25 @@
 #include "opencv2/opencv.hpp"
 #include "opencv2/videoio.hpp"
 
-
+// use pointcloud to send lidar data
+#include <sensor_msgs/PointCloud.h>
 
 // debugstream by gxt_kt
 #include "kitti_ros/debugstream.hpp"
 
 // dataset directory
 std::string dir =
-    "/media/home/2011_09_26_drive_0005_sync/2011_09_26/"
-    "2011_09_26_drive_0005_sync/image_02/data/";
+    "/media/home/2011_09_26_drive_0005_sync/2011_09_26/";
+//
+std::string image_dir=dir+ "2011_09_26_drive_0005_sync/image_02/data/";
 
 int main(int argc, char *argv[]) {
-  // 执行 ros 节点初始化
   ros::init(argc, argv, "main_publish");
-  // 创建 ros 节点句柄(非必须)
   ros::NodeHandle nh;
-  // 控制台输出 hello world
-  // ROS_INFO("hello world!");
   gDebug << "hello world";
-  std::string image_path = dir + "0000000001.png";
+
   std::vector<cv::String> fn;
-  glob(dir + "*.png", fn, false);
+  glob(image_dir + "*.png", fn, false);
 
   // cv::Mat im=cv::imread(fn[0]);
   // if (im.empty()) {
@@ -40,8 +38,16 @@ int main(int argc, char *argv[]) {
   // imshow("image", im);
   // while ((cv::waitKey(0) & 0xFF) != 'q') {}
 
+  // image pub
   image_transport::ImageTransport it(nh);
-  image_transport::Publisher pub = it.advertise("camera02/image", 10);
+  image_transport::Publisher image_pub = it.advertise("camera02/image", 10);
+
+
+  // cloudpoint pub
+  ros::Publisher cloud_pub = nh.advertise<sensor_msgs::PointCloud>("cloudpoint", 50);
+
+
+
   ros::Rate loop_rate(10);
   while (nh.ok()) {
     {// send_image
@@ -58,7 +64,7 @@ int main(int argc, char *argv[]) {
       header.frame_id = "map";
       sensor_msgs::ImagePtr msg =
           cv_bridge::CvImage(header, "bgr8", image).toImageMsg();
-      pub.publish(msg);
+      image_pub.publish(msg);
       gDebug << "send message" << image_i;
       ++image_i;
     }
@@ -66,4 +72,5 @@ int main(int argc, char *argv[]) {
     ros::spinOnce();
     loop_rate.sleep();
   }
+
 }
