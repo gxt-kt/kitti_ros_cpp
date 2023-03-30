@@ -3,13 +3,14 @@
 #include <vector>
 
 // use cv_bridge to publish image
-#include <opencv2/highgui.hpp>
-
 #include "cv_bridge/cv_bridge.h"
 #include "image_transport/image_transport.h"
 #include "opencv2/core.hpp"
+#include <opencv2/highgui.hpp>
 #include "opencv2/opencv.hpp"
 #include "opencv2/videoio.hpp"
+
+
 
 // debugstream by gxt_kt
 #include "kitti_ros/debugstream.hpp"
