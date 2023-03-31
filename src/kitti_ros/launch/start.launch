@@ -1,0 +1,4 @@
+<launch>
+<node pkg="rviz"  type="rviz"  name="rviz"  args="-d $(find kitti_ros)/rviz/kitti_rviz.rviz"></node>
+<node pkg="kitti_ros"  type="kitti_ros_node"  name="kitti_ros_node"  output="screen" ></node>
+</launch>
