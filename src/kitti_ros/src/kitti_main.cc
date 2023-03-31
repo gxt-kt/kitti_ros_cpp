@@ -12,6 +12,7 @@
 #include "kitti_ros/cloud_points.hpp"
 #include "kitti_ros/images.hpp"
 #include "kitti_ros/marker_car.hpp"
+#include "kitti_ros/imu.hpp"
 
 // dataset directory
 std::string dir =
@@ -20,6 +21,7 @@ std::string dir =
 
 std::string image_dir = dir + "image_02/data/";
 std::string lidar_dir = dir + "velodyne_points/data/";
+std::string imu_dir = dir + "oxts/data/";
 
 int main(int argc, char *argv[]) {
   ros::init(argc, argv, "main_publish");
@@ -37,6 +39,9 @@ int main(int argc, char *argv[]) {
 
   // marker car pub
   SendMarkerCar pub_car(nh,"car_pub");
+
+  // marker car pub
+  SendImu pub_imu(nh,"imu_pub");
 
   ros::Rate loop_rate(10);
   while (nh.ok()) {
@@ -59,6 +64,9 @@ int main(int argc, char *argv[]) {
 
     // send car marker
     pub_car.Publish();
+
+    // send imu 
+    pub_imu.Publish(imu_dir + katti_num + ".txt");
 
     gDebug << "send kitti dataset i =" << kitti_i;
     ros::spinOnce();
