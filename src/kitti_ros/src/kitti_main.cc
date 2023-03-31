@@ -6,9 +6,12 @@
 
 // debugstream by gxt_kt
 #include "kitti_ros/debugstream.hpp"
+
+// pub to rviz
 #include "kitti_ros/marker_line.hpp"
 #include "kitti_ros/cloud_points.hpp"
 #include "kitti_ros/images.hpp"
+#include "kitti_ros/marker_car.hpp"
 
 // dataset directory
 std::string dir =
@@ -29,8 +32,11 @@ int main(int argc, char *argv[]) {
   // cloudpoint pub
   CloudPoint pub_cloudpoint(nh, "cloudpoint", 50);
 
-  // marker pub
+  // marker line pub
   SendMarkerLine pub_line(nh, "line_pub");
+
+  // marker car pub
+  SendMarkerCar pub_car(nh,"car_pub");
 
   ros::Rate loop_rate(10);
   while (nh.ok()) {
@@ -50,6 +56,9 @@ int main(int argc, char *argv[]) {
 
     // send line marker
     pub_line.Publish();
+
+    // send car marker
+    pub_car.Publish();
 
     gDebug << "send kitti dataset i =" << kitti_i;
     ros::spinOnce();
