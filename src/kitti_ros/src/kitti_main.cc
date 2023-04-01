@@ -13,6 +13,7 @@
 #include "kitti_ros/images.hpp"
 #include "kitti_ros/marker_car.hpp"
 #include "kitti_ros/imu.hpp"
+#include "kitti_ros/gps.hpp"
 
 // dataset directory
 std::string dir =
@@ -43,6 +44,9 @@ int main(int argc, char *argv[]) {
   // marker car pub
   SendImu pub_imu(nh,"imu_pub");
 
+  // marker car pub
+  SendGps pub_gps(nh,"gps_pub");
+
   ros::Rate loop_rate(10);
   while (nh.ok()) {
     // get current dataset sequence i
@@ -67,6 +71,9 @@ int main(int argc, char *argv[]) {
 
     // send imu 
     pub_imu.Publish(imu_dir + katti_num + ".txt");
+
+    // send gps
+    pub_gps.Publish(imu_dir + katti_num + ".txt");
 
     gDebug << "send kitti dataset i =" << kitti_i;
     ros::spinOnce();

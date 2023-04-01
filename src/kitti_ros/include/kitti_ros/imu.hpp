@@ -8,38 +8,7 @@
 #include <string>
 #include <vector>
 
-enum ImuDataFormat {
-  lat = 0,
-  lon,
-  alt,
-  roll,
-  pitch,
-  yaw,
-  vn,
-  ve,
-  vf,
-  vl,
-  vu,
-  ax,
-  ay,
-  az,
-  af,
-  al,
-  au,
-  wx,
-  wy,
-  wz,
-  wf,
-  wl,
-  wu,
-  pos_accuracy,
-  vel_accuracy,
-  navstat,
-  numsats,
-  posmode,
-  velmode,
-  orimode,
-};
+#include "kitti_ros/oxts_data_format.h"
 
 class SendImu {
  public:
