@@ -3,17 +3,17 @@
 
 #include "ros/ros.h"
 
-
 // debugstream by gxt_kt
 #include "kitti_ros/debugstream.hpp"
 
 // pub to rviz
-#include "kitti_ros/marker_line.hpp"
 #include "kitti_ros/cloud_points.hpp"
-#include "kitti_ros/images.hpp"
-#include "kitti_ros/marker_car.hpp"
-#include "kitti_ros/imu.hpp"
 #include "kitti_ros/gps.hpp"
+#include "kitti_ros/images.hpp"
+#include "kitti_ros/imu.hpp"
+#include "kitti_ros/marker_car.hpp"
+#include "kitti_ros/marker_line.hpp"
+#include "kitti_ros/tracking.hpp"
 
 // dataset directory
 std::string dir =
@@ -23,6 +23,8 @@ std::string dir =
 std::string image_dir = dir + "image_02/data/";
 std::string lidar_dir = dir + "velodyne_points/data/";
 std::string imu_dir = dir + "oxts/data/";
+
+std::string tracking_dir = dir + "training/label_02/0000.txt";
 
 int main(int argc, char *argv[]) {
   ros::init(argc, argv, "main_publish");
@@ -39,13 +41,21 @@ int main(int argc, char *argv[]) {
   SendMarkerLine pub_line(nh, "line_pub");
 
   // marker car pub
-  SendMarkerCar pub_car(nh,"car_pub");
+  SendMarkerCar pub_car(nh, "car_pub");
 
   // marker car pub
-  SendImu pub_imu(nh,"imu_pub");
+  SendImu pub_imu(nh, "imu_pub");
 
   // marker car pub
-  SendGps pub_gps(nh,"gps_pub");
+  SendGps pub_gps(nh, "gps_pub");
+
+  // test tracking draw rectangle
+  // cv::Mat img=cv::imread(image_dir+"0000000000.png");
+  // TrackingDrawRect(img,tracking_dir,0);
+  // cv::imshow("111",img);
+  // cv::waitKey(0);
+  // gDebug << "end";
+  // return 0;
 
   ros::Rate loop_rate(10);
   while (nh.ok()) {
@@ -58,7 +68,9 @@ int main(int argc, char *argv[]) {
     kitti_i++;
 
     // send_image
-    pub_image.Publish(image_dir + katti_num + ".png");
+    // pub_image.Publish(image_dir + katti_num + ".png");  // Not use tracking
+    pub_image.Publish(image_dir + katti_num + ".png", tracking_dir,
+                      kitti_i);  // Use tracking
 
     // send lidar cloud_point
     pub_cloudpoint.Publish(lidar_dir + katti_num + ".bin");
@@ -69,7 +81,7 @@ int main(int argc, char *argv[]) {
     // send car marker
     pub_car.Publish();
 
-    // send imu 
+    // send imu
     pub_imu.Publish(imu_dir + katti_num + ".txt");
 
     // send gps
