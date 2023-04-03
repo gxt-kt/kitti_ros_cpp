@@ -20,6 +20,8 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_ros REQUIRED
 )
 
+
+
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 

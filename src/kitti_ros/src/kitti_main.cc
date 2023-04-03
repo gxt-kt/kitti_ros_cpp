@@ -14,6 +14,7 @@
 #include "kitti_ros/marker_car.hpp"
 #include "kitti_ros/marker_line.hpp"
 #include "kitti_ros/tracking.hpp"
+#include "kitti_ros/marker_3dbox.hpp"
 
 // dataset directory
 std::string dir =
@@ -30,6 +31,8 @@ int main(int argc, char *argv[]) {
   ros::init(argc, argv, "main_publish");
   ros::NodeHandle nh;
   gDebug << "main_publish";
+  auto points=Compute3Dbox(3,4,5,1,1,1,M_PI/4);
+  CalibrationPoint(points);
 
   // image pub
   SendImage pub_image(nh, "camera02/image", 10);
@@ -49,6 +52,9 @@ int main(int argc, char *argv[]) {
   // marker car pub
   SendGps pub_gps(nh, "gps_pub");
 
+  // marker car pub
+  SendMarker3dBox pub_3dbox(nh, "box3d_pub");
+  // ros::Publisher pub=nh.advertise<visualization_msgs::Marker>("pub_key", 10);
   // test tracking draw rectangle
   // cv::Mat img=cv::imread(image_dir+"0000000000.png");
   // TrackingDrawRect(img,tracking_dir,0);
@@ -86,6 +92,9 @@ int main(int argc, char *argv[]) {
 
     // send gps
     pub_gps.Publish(imu_dir + katti_num + ".txt");
+
+    // send 3dbox
+    pub_3dbox.Publish(tracking_dir,kitti_i);
 
     gDebug << "send kitti dataset i =" << kitti_i;
     ros::spinOnce();

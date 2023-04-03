@@ -9,9 +9,15 @@
 #include <string>
 #include <unordered_map>
 
+#include <Eigen/Core>
+#include <Eigen/Dense>
+
 #include "opencv2/core.hpp"
 #include "opencv2/opencv.hpp"
 #include "opencv2/videoio.hpp"
+
+#include "kitti_ros/tracking_format.h"
+
 /*
 #Values    Name      Description
 ----------------------------------------------------------------------------
@@ -38,32 +44,7 @@
                      detection, needed for p/r curves, higher is better.
 */
 
-enum TrackingFormat {
-  frame = 0,
-  track_id,
-  type,
-  truncated,
-  occluded,
-  alpha,
-  bbox_x1,
-  bbox_y1,
-  bbox_x2,
-  bbox_y2,
-  dimensions,
-  location,
-  rotation_y,
-  score,
-};
 
-static std::unordered_map<std::string, cv::Scalar_<double>> tracking_color{
-    {"Car", cv::Scalar(255, 0, 0)},
-    {"Van", cv::Scalar(0, 255, 0)},
-    {"Truck", cv::Scalar(0, 0, 255)},
-    {"Pedestrain", cv::Scalar(255, 255, 0)},
-    {"Person_sitting", cv::Scalar(255, 0, 255)},
-    {"Cyclist", cv::Scalar(0, 255, 255)},
-    {"OTHER", cv::Scalar(255, 255, 255)},
-};
 
 inline bool TrackingDrawRect(cv::Mat& img, std::string tracking_path,
                              int img_frame = 0) {
@@ -111,4 +92,51 @@ inline bool TrackingDrawRect(cv::Mat& img, std::string tracking_path,
   return 0;
 }
 
+
+inline bool TrackingDraw3dBox(cv::Mat& img, std::string tracking_path,
+                              Eigen::Matrix<double, 3, 8>& matrix,
+                              int img_frame = 0) {
+  std::ifstream tracking_file(tracking_path);
+
+  if (!tracking_file.is_open()) {
+    std::cerr << "Unable to open file: " << tracking_path << std::endl;
+    return 1;
+  }
+  std::string line;
+  std::vector<std::string> tracking_data(17);
+  while (std::getline(tracking_file, line)) {
+    std::istringstream iss(line);
+    if (!(iss >> tracking_data[0] >> tracking_data[1] >> tracking_data[2] >>
+          tracking_data[3] >> tracking_data[4] >> tracking_data[5] >>
+          tracking_data[6] >> tracking_data[7] >> tracking_data[8] >>
+          tracking_data[9] >> tracking_data[10] >> tracking_data[11] >>
+          tracking_data[12] >> tracking_data[13] >> tracking_data[14] >>
+          tracking_data[15] >> tracking_data[16])) {
+      break;
+    }  // error
+    if (std::stoi(tracking_data[frame]) == img_frame) {
+      cv::Scalar color(255, 255, 255);
+      auto find = tracking_color.find(tracking_data[type]);
+      if (find != tracking_color.end()) {
+        color = find->second;
+      } else {
+        color = tracking_color["OTHER"];
+      }
+      cv::rectangle(img,
+                    cv::Rect(std::stoi(tracking_data[bbox_x1]),
+                             std::stoi(tracking_data[bbox_y1]),
+                             std::stoi(tracking_data[bbox_x2]) -
+                                 std::stoi(tracking_data[bbox_x1]),
+                             std::stoi(tracking_data[bbox_y2]) -
+                                 std::stoi(tracking_data[bbox_y1])),
+                    color);
+    }
+
+    if (std::stoi(tracking_data[frame]) > img_frame) {
+      break;
+    }
+  }
+
+  return 0;
+}
 #endif
