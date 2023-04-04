@@ -15,6 +15,7 @@
 #include "kitti_ros/marker_line.hpp"
 #include "kitti_ros/tracking.hpp"
 #include "kitti_ros/marker_3dbox.hpp"
+#include "kitti_ros/track_show.hpp"
 
 // dataset directory
 std::string dir =
@@ -54,6 +55,9 @@ int main(int argc, char *argv[]) {
 
   // marker car pub
   SendMarker3dBox pub_3dbox(nh, "box3d_pub");
+
+  // SendTrackShow
+  SendTrackShow pub_trackshow(nh,"trackshow_pub");
   // ros::Publisher pub=nh.advertise<visualization_msgs::Marker>("pub_key", 10);
   // test tracking draw rectangle
   // cv::Mat img=cv::imread(image_dir+"0000000000.png");
@@ -71,7 +75,6 @@ int main(int argc, char *argv[]) {
     std::stringstream ss;
     ss << std::setw(10) << std::setfill('0') << std::to_string(kitti_i);
     std::string katti_num = ss.str();
-    kitti_i++;
 
     // send_image
     // pub_image.Publish(image_dir + katti_num + ".png");  // Not use tracking
@@ -96,7 +99,11 @@ int main(int argc, char *argv[]) {
     // send 3dbox
     pub_3dbox.Publish(tracking_dir,kitti_i);
 
+    // send trackshow
+    pub_trackshow.Publish(imu_dir+katti_num+".txt",kitti_i);
+
     gDebug << "send kitti dataset i =" << kitti_i;
+    kitti_i++;
     ros::spinOnce();
     loop_rate.sleep();
   }

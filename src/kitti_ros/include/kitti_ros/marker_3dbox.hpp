@@ -62,7 +62,6 @@ class SendMarker3dBox {
   SendMarker3dBox(ros::NodeHandle nh_, std::string title_, int queue_size = 10)
       : nh(nh_), title(title_) {
     pub = nh.advertise<visualization_msgs::MarkerArray>(title, queue_size);
-    // pub = nh.advertise<visualization_msgs::Marker>(title, queue_size);
   };
 
   bool TrackingDraw3dBox(std::string tracking_path, int img_frame = 0) {
@@ -85,7 +84,7 @@ class SendMarker3dBox {
         break;
       }  // error
       if (std::stoi(tracking_data[frame]) == img_frame) {
-        if(tracking_data[type]=="DontCare") {
+        if (tracking_data[type] == "DontCare") {
           continue;
         }
         cv::Scalar color(255, 255, 255);
@@ -101,7 +100,8 @@ class SendMarker3dBox {
             std::stod(tracking_data[l_]), std::stod(tracking_data[x_]),
             std::stod(tracking_data[y_]), std::stod(tracking_data[z_]),
             std::stod(tracking_data[rotation_y]),
-            std::stoi(tracking_data[track_id])+100, color); //id加一个偏移防止之前的重复了
+            std::stoi(tracking_data[track_id]),
+            color,tracking_data[track_id]);  // id加一个偏移防止之前的重复了
       }
 
       if (std::stoi(tracking_data[frame]) > img_frame) {
@@ -113,7 +113,7 @@ class SendMarker3dBox {
   }
   void AddMarker3dBox(double h, double w, double l, double x, double y,
                       double z, double rotation, int id,
-                      cv::Scalar_<double> color) {
+                      cv::Scalar_<double> color,std::string id_string="") {
     // Create the marker message
     visualization_msgs::Marker marker;
     marker.type = visualization_msgs::Marker::LINE_LIST;
@@ -125,9 +125,9 @@ class SendMarker3dBox {
     marker.pose.orientation.y = 0.0;
     marker.pose.orientation.z = 0.0;
     marker.pose.orientation.w = 1.0;
-    marker.color.r = color.val[2]/255;
-    marker.color.g = color.val[1]/255;
-    marker.color.b = color.val[0]/255;
+    marker.color.r = color.val[2] / 255;
+    marker.color.g = color.val[1] / 255;
+    marker.color.b = color.val[0] / 255;
     marker.color.a = 1.0;
 
     // Set the marker type
@@ -180,7 +180,26 @@ class SendMarker3dBox {
     marker.points.push_back(p.at(7));
     marker.points.push_back(p.at(3));
 
+    visualization_msgs::Marker marker_id;
+    marker_id.header.frame_id = "map";
+    marker_id.header.stamp = ros::Time::now();
+    marker_id.ns = "marker_id";
+    marker_id.id = id;
+    marker_id.lifetime = ros::Duration(0.1);  // 一秒十帧，所以框持续0.1s就消失
+    marker_id.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+    marker_id.action = visualization_msgs::Marker::ADD;
+    marker_id.pose.position.x = (lidar_point(0, 4)+lidar_point(0, 5))/2;
+    marker_id.pose.position.y = (lidar_point(1, 4)+lidar_point(1, 5))/2;
+    marker_id.pose.position.z = (lidar_point(2, 4)+lidar_point(2, 5))/2;
+    marker_id.scale.z = 1.0;
+    marker_id.color.r = color.val[2] / 255;
+    marker_id.color.g = color.val[1] / 255;
+    marker_id.color.b = color.val[0] / 255;
+    marker_id.color.a = 1.0;
+    marker_id.text = id_string;
+
     marker_array.markers.push_back(marker);
+    marker_array.markers.push_back(marker_id);
   }
 
   void Publish(std::string tracking_path = "", int img_frame = -1) {
